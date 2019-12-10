@@ -1,0 +1,52 @@
+#!/usr/bin/python2
+
+#########################################################################
+### Configuration #######################################################
+#########################################################################
+
+config_file = '/etc/ldapgroup/config.yaml'
+description = 'add user to a specified LDAP group'
+group_name = None
+user_name = None
+
+#########################################################################
+### Declarations ########################################################
+#########################################################################
+
+import argparse
+import ldapgroup
+import sys
+
+#########################################################################
+### main () #############################################################
+#########################################################################
+
+parser = argparse.ArgumentParser(description=description)
+parser.add_argument('--config', dest='config', type=str,
+    default=config_file, help="alternate config file")
+
+parser.add_argument('group_name', type=str, help="group name")
+parser.add_argument('user_name', type=str, help="user name")
+
+args = parser.parse_args()
+
+group_name = args.group_name
+user_name = args.user_name
+
+config = ldapgroup.config_yaml(args.config)
+
+try:
+    connection = ldapgroup.connect(group_name=group_name, config=config)
+except Exception, e:
+    print("failed to connect as %s: %s") % (group_name, e)
+    sys.exit(-1)
+
+if ldapgroup.has_user(connection, user_name):
+    print '%s already a member of group %s' % (user_name, group_name)
+    sys.exit(0)
+
+try:
+    ldapgroup.add_member(connection, user_name)
+except Exception, e:
+    print("Failed to add %s to %s: %s" % (user_name, group_name, e))
+    sys.exit(1)
