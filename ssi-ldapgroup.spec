@@ -29,14 +29,6 @@ if [[ $RPM_BUILD_ROOT != "/" ]]; then
     rm -rf $RPM_BUILD_ROOT
 fi
 
-mkdir -p ${RPM_BUILD_ROOT}/usr/share/man/man1
-for i in `ls usr/bin`; do
-    pod2man --section 1 --center="System Commands" usr/bin/${i} \
-        > ${RPM_BUILD_ROOT}/usr/share/man/man1/${i}.1 ;
-done
-
-rsync -Crlpt ./usr ${RPM_BUILD_ROOT}
-
 python3 setup.py install --prefix=${RPM_BUILD_ROOT}/usr \
     --single-version-externally-managed --record=installed_files
 
@@ -47,7 +39,6 @@ python3 setup.py install --prefix=${RPM_BUILD_ROOT}/usr \
 %files
 %defattr(-,root,root)
 /usr/bin/*
-/usr/share/man/man1/*
 %{python3_sitelib}/ldapgroup/*py*
 %{python3_sitelib}/*egg-info
 
